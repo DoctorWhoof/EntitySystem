@@ -84,8 +84,7 @@ Class Entity
 		End		
 	
 		For local e := Eachin children
-			'removeFromPArent = false is needed when recursively destroying a hierarchy
-			e.Destroy( False )
+			e.Destroy( False )	'removeFromPArent = false is needed when recursively destroying a hierarchy
 		Next
 		children.Clear()
 		
