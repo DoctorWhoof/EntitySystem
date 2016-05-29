@@ -10,27 +10,28 @@ Class Entity
 
 	Field enabled			:= True
 	Field children			:= New Stack<Entity>
-	Field components		:= New Stack<Component>
+	Field components		:= New Stack<Component>		'Main component list, they can be reordered
 	
 	Global allEntities		:= New EntityMap
 	
 	Protected
+	Field _componentsByName	:= New StringMap<Component>		'allows fast access indexed by name
 	Field _name				:= "entity"
 	Field _parent			:Entity
-	Field _firstUpdate		:= True
+	Field _init				:= False
 
 	Public
 	
-	'************************************* Instance Properties *************************************	
+	'************************************* Instance Properties *************************************
 	
-	Property name:String()
+	Property Name:String()
 		Return _name
 	Setter( n:String )
 		SetUniqueName( n )
 	End
 	
 	
-	Property parent:Entity()
+	Property Parent:Entity()
 		Return _parent
 	Setter( dad:Entity )
 		If dad
@@ -49,7 +50,7 @@ Class Entity
 				_parent = dad
 				_parent.children.Push( Self )
 			Else
-				Print("Entity: " + _name + " can't parent to itself or to one of its own children")
+				Print("Entity: Warning, " + _name + " can't parent to itself or to one of its own children.")
 			End
 		Else
 			If _parent Then _parent.children.RemoveEach( Self )
@@ -67,10 +68,24 @@ Class Entity
 	End
 
 
-	Method Attach( comp:Component, index:Int = -1 )
+	Method AddComponent:Component( comp:Component, index:Int = -1 )
+		If _componentsByName.Get( comp.Name )
+			Print( "Entity: Warning, a component named " + comp.Name + " already belongs to entity " + Name + "." )
+			Return Null
+		End
 		If index < 0 Then index = components.Length
+		_componentsByName.Add( comp.Name, comp )
 		components.Insert( index, comp )
 		comp.entity = Self
+		Return comp
+	End
+
+
+	Method GetComponent:Component( compName:String )
+		Local c := _componentsByName.Get( compName )
+		If c Then Return c
+		Print( "Entity: Warning, no component named " + compName + " found." )
+		Return Null
 	End
 
 
@@ -78,19 +93,19 @@ Class Entity
 		OnDestroy()
 		allEntities.Remove( _name )
 
-		If parent And removeFromParent
+		If Parent And removeFromParent
 			_parent.children.RemoveEach( Self )
 			_parent = Null
 		End		
 	
 		For local e := Eachin children
-			e.Destroy( False )	'removeFromPArent = false is needed when recursively destroying a hierarchy
+			e.Destroy( False )	'removeFromParent = false is needed when recursively destroying a hierarchy
 		Next
 		children.Clear()
 		
 		If Not components.Empty
 			For local comp := Eachin components
-				comp.OnDestroy()
+				comp.Destroy()
 				comp = Null
 			End
 			components.Clear()
@@ -98,23 +113,32 @@ Class Entity
 	End
 	
 	
+	Method Init()
+		_init = True
+		OnCreate()	
+	End
+	
+	
 	Method Update()
-		If _firstUpdate
-			_firstUpdate = False
-			OnCreate()
-			Update()
-		Else
-			If enabled
-				OnUpdate()
-				For Local c := Eachin components
-					c.Update()
-				next
-			End
+		If Not _init
+			Init()
 		End
+		If enabled
+			OnUpdate()
+			For Local c := Eachin components
+				c.Update()
+			next
+		End
+		For local e := Eachin children
+			e.Update()
+		Next
 	End
 	
 	
 	Method Reset()
+		If Not _init
+			Init()
+		End
 		OnReset()
 		For Local c := Eachin components
 			c.Reset()
@@ -150,6 +174,19 @@ Class Entity
 	End
 
 	'************************************* Class Functions *************************************
+	
+	Function InitializeAll()
+		'Initializes all entities and components created this far
+		'If new entities or components are created after this, make sure to call the Init() method individually
+		'Or just call this again (anything already initialized won't initialize again)
+		'Another option is to do nothing - everything initializes on the first update if necessary.
+		For Local e := Eachin allEntities.Values
+			e.Init()
+		Next
+		For Local c := Eachin Component.allComponents
+			c.Init()
+		Next	
+	End
 	
 
 End
