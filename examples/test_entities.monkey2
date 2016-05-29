@@ -4,7 +4,8 @@ Using std..
 
 Function Main()
 
-	'Create entities and initialize them (required)
+	'Create entities and initialize them.
+	'Initializing is recommended, but not required, since it happens automatically albeit not necessarily when you want it.
 
 	Local arr := New Entity[5,5]
 	For Local x := 0 Until 5
@@ -18,7 +19,7 @@ Function Main()
 	Local entity03 := New Entity( "entity03" )
 	Local entity04 := New Entity( "entity04" )
 	
-'   	Entity.InitializeAll()
+	Entity.InitializeAll()
 	
 	Print( " ~n******************** 2D array with entities test ********************" )
 	Print( "Notice how the names are unique, depite the code naming them all the same~n " )
