@@ -5,7 +5,7 @@ Using std..
 Function Main()
 
 	'Create entities and initialize them.
-	'Initializing is recommended, but not required, since it happens automatically albeit not necessarily when you want it.
+	'Initializing is recommended, but not required since it happens automatically (albeit not necessarily when you want it).
 
 	Local arr := New Entity[5,5]
 	For Local x := 0 Until 5
