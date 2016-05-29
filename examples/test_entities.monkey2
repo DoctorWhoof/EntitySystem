@@ -52,7 +52,7 @@ Function Main()
 	Local c := entity01.GetComponent( "MessageComponent" )
 	Print( " ~nComponent: " + c.Name + " attached to " + entity01.Name )
 	
-	'Perform usual entity events.
+	'Perform usual entity events, which are propagated to components as well.
 	entity01.Reset()
 	entity01.Update()
 	entity01.Destroy()
