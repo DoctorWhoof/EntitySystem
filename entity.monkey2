@@ -32,9 +32,9 @@ Class Entity
 	End
 	
 	
-	Property Parent:Entity()
+	Property Parent:Entity() Virtual
 		Return _parent
-	Setter( dad:Entity )
+	Setter( dad:Entity ) Virtual
 		If dad
 			Local dadIsMyChild := False
 			For local e := Eachin children
