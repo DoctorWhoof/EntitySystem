@@ -11,19 +11,20 @@ Class Entity
 	Field enabled			:= True
 	Field children			:= New Stack<Entity>
 	Field components		:= New Stack<Component>		'Main component list, they can be reordered
-	
+
 	Global allEntities		:= New EntityMap
-	
-	Protected
+	Global rootEntities		:= New EntityMap
+
+	Protected	
 	Field _componentsByName	:= New StringMap<Component>		'allows fast access indexed by name
 	Field _name				:= "entity"
 	Field _parent			:Entity
 	Field _init				:= False
 
+	'************************************* Public Properties *************************************
+
 	Public
-	
-	'************************************* Instance Properties *************************************
-	
+
 	Property Name:String()
 		Return _name
 	Setter( n:String )
@@ -45,26 +46,33 @@ Class Entity
 			If dad <> Self And Not dadIsMyChild
 				If _parent
 					If dad = _parent Then Return
-					_parent.children.RemoveEach( Self )			
+					_parent.children.RemoveEach( Self )
+				Else
+					rootEntities.Remove( _name )
 				End
 				_parent = dad
 				_parent.children.Push( Self )
+				
 			Else
 				Print("Entity: Warning, " + _name + " can't parent to itself or to one of its own children.")
 			End
 		Else
-			If _parent Then _parent.children.RemoveEach( Self )
-			_parent = Null
+			If Not rootEntities.Contains( Self.Name )
+				If _parent Then _parent.children.RemoveEach( Self )
+				_parent = Null
+				rootEntities.Add( _name, Self )
+			End
 		End
 	End
 	
 
-	'************************************* Instance Methods *************************************
-	
+	'************************************* Public Methods *************************************
+
 
 	Method New( name:String )
 		SetUniqueName( name )
 		allEntities.Add( name, Self )
+		rootEntities.Add( name, Self )
 	End
 
 
@@ -111,15 +119,37 @@ Class Entity
 			components.Clear()
 		End
 	End
+
 	
-	
-	Method Init()
-		_init = True
-		OnCreate()	
+	Method SetUniqueName( name:String )
+		Local isRoot := False
+		If rootEntities.Contains( _name )
+			isRoot = True
+			rootEntities.Remove( Self._name )
+		End
+		allEntities.Remove( Self._name )
+		
+		Local n := 0
+		Local originalName := name
+		While allEntities.Contains( name )
+			n += 1
+			name = originalName + n
+		End
+		Self._name = name
+		
+		allEntities.Add( name, Self )
+		If isRoot Then rootEntities.Add( name, Self )		
 	End
 	
 	
-	Method Update()
+	'************************************* Virtual Methods *************************************
+	
+	Method Init() Virtual
+		_init = True
+		OnStart()	
+	End
+	
+	Method Update() Virtual
 		If Not _init
 			Init()
 		End
@@ -134,8 +164,7 @@ Class Entity
 		Next
 	End
 	
-	
-	Method Reset()
+	Method Reset() Virtual
 		If Not _init
 			Init()
 		End
@@ -144,24 +173,8 @@ Class Entity
 			c.Reset()
 		next	
 	End
-
 	
-	Method SetUniqueName( name:String )
-		allEntities.Remove( Self._name )
-		Local n := 0
-		Local originalName := name
-		While allEntities.Contains( name )
-			n += 1
-			name = originalName + n
-		End
-		Self._name = name
-		allEntities.Add( name, Self )
-	End
-	
-	
-	'************************************* Virtual Methods *************************************
-	
-	Method OnCreate() Virtual
+	Method OnStart() Virtual
 	End
 	
 	Method OnUpdate() Virtual
@@ -199,6 +212,13 @@ Class EntityMap Extends Map< String, Entity >
 			e.Destroy()
 		End
 		Clear()
+	End
+	
+	Method List()
+		Print( "Entity: Listing all entities..." )
+		For Local e:= Eachin Values
+			Print( e.Name )
+		End
 	End
 	
 End
