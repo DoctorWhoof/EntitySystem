@@ -1,5 +1,5 @@
 
-#Import "../entity"
+#Import "../coreentity"
 Using std..
 
 Function Main()
@@ -7,19 +7,19 @@ Function Main()
 	'Create entities and initialize them.
 	'Initializing is recommended, but not required since it happens automatically (albeit not necessarily when you want it).
 
-	Local arr := New Entity[5,5]
+	Local arr := New CoreEntity[5,5]
 	For Local x := 0 Until 5
 		For Local y := 0 Until 5
-			arr[ x, y ] = New Entity( "arrayEntity" )
+			arr[ x, y ] = New CoreEntity( "arrayEntity" )
 		Next
 	Next
 	
-	Local entity01 := New Entity( "entity01" )
-	Local entity02 := New Entity( "entity02" )
-	Local entity03 := New Entity( "entity03" )
-	Local entity04 := New Entity( "entity04" )
+	Local entity01 := New CoreEntity( "entity01" )
+	Local entity02 := New CoreEntity( "entity02" )
+	Local entity03 := New CoreEntity( "entity03" )
+	Local entity04 := New CoreEntity( "entity04" )
 	
-	Entity.InitializeAll()
+	CoreEntity.InitializeAll()
 	
 	Print( " ~n******************** 2D array with entities test ********************" )
 	Print( "Notice how the names are unique, depite the code naming them all the same~n " )
@@ -30,7 +30,7 @@ Function Main()
 		Next
 	Next
 
-	Print( " ~n******************** Entity events and parenting test ********************~n " )
+	Print( " ~n******************** CoreEntity events and parenting test ********************~n " )
 	
 	'Form hierarchy
 	entity02.Parent = entity01
@@ -60,7 +60,7 @@ Function Main()
 End
 
 
-Class MessageComponent Extends Component
+Class MessageComponent Extends CoreComponent
 
 	Method New()
 		Super.New( "MessageComponent" )

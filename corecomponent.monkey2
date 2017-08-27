@@ -1,11 +1,12 @@
 
-Class Component
+Namespace corecomponent
+
+Class CoreComponent
 
 	Field enabled			:= True
-	Field entity 			:Entity			'The owner of this component
-	Field target 			:Entity			'Useful for some components
+	Field entity 			:CoreEntity			'The owner of this component
 	
-	Global allComponents	:= New List<Component>		'Components do not require unique names, so this is a normal list
+	Global allComponents	:= New List<CoreComponent>		'Components do not require unique names, so this is a normal list
 	
 	Protected
 	Field _name 			:= ""
@@ -57,6 +58,11 @@ Class Component
 		allComponents.Remove( Self )
 		OnDestroy()
 	End
+	
+	Method SendEvent( event:Void() )
+		event()
+	End
+	
 
 	'************************************* Virtual methods *************************************
 	
